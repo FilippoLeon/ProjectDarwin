@@ -36,8 +36,10 @@ public:
     , uniform_real(0, 1)
     , world(100, 100) {
         instance = this;
+    }
 
-        population.resize(100);
+    void populate() {
+        population.resize(20);
     }
 
     template <typename T = int>
@@ -55,6 +57,12 @@ public:
     void tic() {
         for (auto &organism: population) {
             organism.tic();
+        }
+    }
+
+    void draw() {
+        for (auto &organism: population) {
+            organism.draw();
         }
     }
 

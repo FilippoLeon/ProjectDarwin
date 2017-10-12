@@ -16,11 +16,23 @@
 //
 // Created by filippo on 10/10/17.
 //
+#pragma once
 
-#include "allegro/display.hpp"
+#include <allegro5/allegro5.h>
+
+#include <boost/log/trivial.hpp>
+
+#include <fmt/format.h>
+
+#include "allegro/allegro.hpp"
 
 namespace Allegro {
 
-Display * Display::main = nullptr;
+class Font {
+public:
+
+private:
+    ALLEGRO_FONT *font = nullptr;
+};
 
 }

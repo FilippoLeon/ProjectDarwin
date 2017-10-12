@@ -24,6 +24,10 @@
 
 #include "allegro/allegro.hpp"
 
+#include "allegro/chronometer.hpp"
+
+#include <iostream>
+
 namespace Allegro {
 
 class Color {
@@ -44,6 +48,10 @@ public:
     Display (int width, int height) {
         init();
         create_display(width, height);
+
+        if(main == nullptr) {
+            main = this;
+        }
     }
 
 
@@ -54,7 +62,23 @@ public:
     }
 
     inline void flip(void) {
+
+//        al_init_font_addon(void)
+
+//        ALLEGRO_FONT *al_load_font(char const *filename, int size, int flags)
+//        : al_destroy_font,
+
+        std::chrono::nanoseconds ns = timer.elapsed();
+        std::cout << fmt::format("-- {} ns // {} FPS--",
+                                 ns.count(),
+                                 1000. / std::chrono::duration_cast<std::chrono::milliseconds>(ns).count());
+//        al_draw_text(const ALLEGRO_FONT *font,
+//        Color(188, 20, 21), 20, 20, ALLEGRO_ALIGN_LEFT ,
+//        time.c_str())
+
         al_flip_display();
+
+        timer.reset();
     }
 
     inline void rest(float time) {
@@ -73,6 +97,14 @@ public:
         return al_get_backbuffer(display);
     }
 
+    void toggle_fps(bool toggle) {
+        draw_fps = toggle;
+        if(toggle) {
+
+        }
+    }
+
+    static Display * main;
 protected:
     inline void init() {
 
@@ -91,6 +123,19 @@ protected:
 
 private:
     ALLEGRO_DISPLAY * display = nullptr;
+
+    bool         draw_fps = false;
+    Chronometer  timer;
 };
+
+
+template <class Image>
+[[nodiscard]]
+inline decltype(auto) Allegro::set_target(const Image & img) {
+    return ExpiringFuture(
+            [&img] () { al_set_target_bitmap(img.get()); },
+            [] () { al_set_target_bitmap(Display::main->get_backbuffer()); }
+    );
+}
 
 }

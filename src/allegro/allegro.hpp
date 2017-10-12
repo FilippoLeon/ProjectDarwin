@@ -31,6 +31,7 @@
 
 namespace Allegro {
 
+//class Display;
 
 class FailedObjectCreation : public std::exception {};
 class FailedAllegroInit : public std::exception {};
@@ -75,7 +76,8 @@ public:
     }
 
     template <class Image, class Display>
-    [[nodiscard]] inline decltype(auto) set_target(const Image & img, const Display & reset) {
+    [[nodiscard]]
+    static inline decltype(auto) set_target(const Image & img, const Display & reset) {
         return ExpiringFuture(
                 [&img] () { al_set_target_bitmap(img.get()); },
                 [&reset] () { al_set_target_bitmap(reset.get_backbuffer()); }
@@ -83,12 +85,17 @@ public:
     }
 
     template <class Image>
-    [[nodiscard]] inline decltype(auto) set_target(const Image & img, const Image & reset) {
+    [[nodiscard]]
+    static inline decltype(auto) set_target(const Image & img, const Image & reset) {
         return ExpiringFuture(
             [&img] () { al_set_target_bitmap(img.get()); },
             [&reset] () { al_set_target_bitmap(reset.get()); }
         );
     }
+
+    template <class Image>
+    [[nodiscard]]
+    static inline decltype(auto) set_target(const Image & img);
 
     static ALLEGRO_PATH * Resources() {
         return al_get_standard_path(ALLEGRO_RESOURCES_PATH);
@@ -105,3 +112,5 @@ private:
 };
 
 }
+
+#include "allegro/display.hpp"

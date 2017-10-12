@@ -36,7 +36,13 @@ void Organism::tic(void) {
     genome.process_food(*this);
 
 
-    call([] (observer_p o) { o->update(); });
+    call([] (observer_p & o) { o->update(); });
+//		process_movement();
+//		process_food();
+}
+
+void Organism::draw(void) {
+    call([] (observer_p & o) { o->draw(); });
 //		process_movement();
 //		process_food();
 }

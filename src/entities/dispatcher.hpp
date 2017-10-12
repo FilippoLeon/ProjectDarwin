@@ -27,7 +27,8 @@ namespace Darwin::Entities {
 template <class Subject>
 class Observer {
 public:
-	virtual void update() {};
+    virtual void update() {};
+    virtual void draw() {};
 };
 
 template <class Subject>
@@ -35,14 +36,16 @@ class Dispatcher {
 protected:
 public:
 	using observer_t = Observer<Subject>;
-	using observer_p = std::shared_ptr<observer_t>;
-	using factory_t = std::function<observer_p(std::shared_ptr<Subject>)>;
+	using observer_p = std::unique_ptr<observer_t>;
+	using factory_t = std::function<observer_p(Subject*)>;
 public:
 	Dispatcher() {
 		for(auto factory: factories) {
-			observers.push_back(factory(std::dynamic_pointer_cast<Subject>(std::shared_ptr<Dispatcher>(this))));
+			observers.emplace_back(factory(static_cast<Subject*>(this)));
 		}
 	}
+    Dispatcher(Dispatcher &&) = default;
+
     virtual ~Dispatcher() = default;
 
 	static void register_observer_factory(factory_t factory) {

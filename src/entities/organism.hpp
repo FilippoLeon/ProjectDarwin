@@ -24,16 +24,21 @@
 #include "entities/genome.hpp"
 
 #include "allegro/bitmap.hpp"
+#include "allegro/display.hpp"
 
 namespace Darwin::Entities {
 
 class Organism : public Dispatcher<Organism> {
 public:
     Organism();
+    Organism(Organism &&) = default;
+    Organism(const Organism &) = delete;
 	Organism(Genome & genome);
     virtual ~Organism() = default;
 
 	void tic(void);
+    void draw(void);
+
     Main::coord_t get_position();
 
     void change_position(const Main::coord_t & delta);
@@ -57,16 +62,26 @@ private:
 
 class OrganismBitmap : public Observer<Organism> {
 public:
-	OrganismBitmap(std::shared_ptr<Organism> organism)
-            : organism(organism) {
-		Allegro::Bitmap bitmap(10, 10);
+	OrganismBitmap(Organism* organism)
+            : organism(organism), bitmap(10, 10) {
+        {
+            Allegro::ExpiringFuture fut = Allegro::Allegro::set_target(bitmap);
+            Allegro::Display::main->clear(Allegro::Color(188,188,0));
+        }
 	}
 
-	virtual void update() {
+    virtual void update() {
 
+    }
+
+	virtual void draw() {
+        auto [x,y] = organism->get_position();
+        bitmap.draw(x, y ,0);
 	}
 private:
-	std::shared_ptr<Organism> organism;
+    Allegro::Bitmap bitmap;
+
+	Organism * organism;
 };
 
 }

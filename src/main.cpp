@@ -27,7 +27,6 @@
 #include "entities/organism.hpp"
 
 int main() {
-    Darwin::Main::Controller<> main;
 
     Allegro::Allegro allegro(Allegro::Component::Image);
 
@@ -53,13 +52,18 @@ int main() {
         display.clear(Allegro::Color(244,244,1));
     }
 
-//    Darwin::Entities::Organism organism;
+    Darwin::Main::Controller<> main;
 
     Darwin::Entities::Dispatcher<Darwin::Entities::Organism>::register_observer_factory(
-            [] (std::shared_ptr<Darwin::Entities::Organism> o) {
-                return std::static_pointer_cast<Darwin::Entities::Observer<Darwin::Entities::Organism>>(std::make_shared<Darwin::Entities::OrganismBitmap>(o));
+            [] (Darwin::Entities::Organism* o) {
+                return std::move(std::make_unique<Darwin::Entities::OrganismBitmap>(o));
             }
     );
+
+    Darwin::Entities::Organism organism;
+    main.populate();
+
+    display.toggle_fps(true);
 
     bool redraw = false;
     bool running = true;
@@ -84,6 +88,7 @@ int main() {
 
             display.clear();
 
+            main.draw();
 //            auto [x, y] = organism.get_position();
 //            image.draw(x ,y ,0);
 //            image2.draw(x + 20, y+ 20, 0);;
