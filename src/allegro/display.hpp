@@ -26,22 +26,12 @@
 
 #include "allegro/chronometer.hpp"
 
+#include "allegro/color.hpp"
+#include "allegro/font.hpp"
+
 #include <iostream>
 
 namespace Allegro {
-
-class Color {
-public:
-    Color(unsigned char r, unsigned char g, unsigned char b) {
-        color = al_map_rgb(r, g, b);
-    }
-
-    inline operator ALLEGRO_COLOR() const {
-        return color;
-    }
-private:
-    ALLEGRO_COLOR color;
-};
 
 class Display {
 public:
@@ -63,18 +53,13 @@ public:
 
     inline void flip(void) {
 
-//        al_init_font_addon(void)
-
-//        ALLEGRO_FONT *al_load_font(char const *filename, int size, int flags)
-//        : al_destroy_font,
 
         std::chrono::nanoseconds ns = timer.elapsed();
         std::cout << fmt::format("-- {} ns // {} FPS--",
                                  ns.count(),
                                  1000. / std::chrono::duration_cast<std::chrono::milliseconds>(ns).count());
-//        al_draw_text(const ALLEGRO_FONT *font,
-//        Color(188, 20, 21), 20, 20, ALLEGRO_ALIGN_LEFT ,
-//        time.c_str())
+
+        Allegro::Font::main.draw(100, 10, "Hello");
 
         al_flip_display();
 

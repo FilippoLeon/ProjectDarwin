@@ -28,7 +28,7 @@
 
 int main() {
 
-    Allegro::Allegro allegro(Allegro::Component::Image);
+    Allegro::Allegro allegro(Allegro::Component::All);
 
     Allegro::Display display(600, 600);
 

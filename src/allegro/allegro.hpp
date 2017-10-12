@@ -20,6 +20,7 @@
 
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_image.h>
+#include <allegro5/allegro_font.h>
 
 #include <boost/log/trivial.hpp>
 
@@ -42,8 +43,10 @@ public:
 };
 
 enum class Component {
-    None = 0x00,
-    Image = 0x01,
+    None =  0,
+    Image = 1 << 0,
+    Font =  1 << 1,
+    All =   ~0,
 }; FLAGIFY(Component);
 
 class Allegro {
@@ -71,6 +74,15 @@ public:
             } else {
                 BOOST_LOG_TRIVIAL(info) << "Loaded Image addon!";
                 image_init = true;
+            }
+        }
+        if( *(component & Component::Font) ) {
+            if (!al_init_font_addon()) {
+                BOOST_LOG_TRIVIAL(error) << "Failed to initialize the Font addon!";
+                throw FailedAllegroInit();
+            } else {
+                BOOST_LOG_TRIVIAL(info) << "Loaded Font addon!";
+                font_init = true;
             }
         }
     }
@@ -108,6 +120,7 @@ public:
     }
 private:
     bool image_init = false;
+    bool font_init = false;
 
 };
 

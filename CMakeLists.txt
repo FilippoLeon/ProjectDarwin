@@ -25,7 +25,7 @@ add_definitions("-std=c++17")
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules)
 
-find_package(Allegro 5.0 COMPONENTS main image REQUIRED)
+find_package(Allegro 5.0 COMPONENTS main image font REQUIRED)
 find_package(Threads)
 
 set(Boost_USE_STATIC_LIBS       ON)
