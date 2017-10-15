@@ -21,6 +21,7 @@
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_font.h>
+#include <allegro5/allegro_ttf.h>
 
 #include <boost/log/trivial.hpp>
 
@@ -29,10 +30,32 @@
 #include "tools/flagify.hpp"
 
 #include "allegro/expiring_future.hpp"
+#include "allegro/color.hpp"
 
 namespace Allegro {
 
 //class Display;
+
+struct Percentage {
+public:
+    constexpr Percentage(float value) : value_(value / 100.) {
+        if(value_ < 0 or value_ > 1) {
+            throw std::invalid_argument(fmt::format("Invalid value of {}.", value_));
+        }
+    }
+
+    float get() const { return value_; }
+private:
+    float value_;
+};
+
+constexpr inline Percentage operator ""_pct(unsigned long long int val) {
+    return Percentage(val);
+}
+
+constexpr inline Percentage operator ""_pct(long double val) {
+    return Percentage(val);
+}
 
 class FailedObjectCreation : public std::exception {};
 class FailedAllegroInit : public std::exception {};
@@ -59,6 +82,9 @@ public:
         if( image_init ){
             al_shutdown_image_addon();
         }
+        if( font_init ) {
+            al_shutdown_font_addon();
+        }
     }
 
     inline void init(Component component) {
@@ -81,10 +107,13 @@ public:
                 BOOST_LOG_TRIVIAL(error) << "Failed to initialize the Font addon!";
                 throw FailedAllegroInit();
             } else {
+                al_init_ttf_addon();
                 BOOST_LOG_TRIVIAL(info) << "Loaded Font addon!";
                 font_init = true;
             }
         }
+
+        Color::Red = Color(254, 0, 0);
     }
 
     template <class Image, class Display>
@@ -92,7 +121,7 @@ public:
     static inline decltype(auto) set_target(const Image & img, const Display & reset) {
         return ExpiringFuture(
                 [&img] () { al_set_target_bitmap(img.get()); },
-                [&reset] () { al_set_target_bitmap(reset.get_backbuffer()); }
+                [&reset] () { reset.set_current(); }
         );
     }
 

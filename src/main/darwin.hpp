@@ -47,23 +47,52 @@ public:
         if constexpr( std::is_same<T, int>::value )
         {
             return instance->uniform_int(instance->engine);
-        } else if ( std::is_same<T, float>::value ) {
+        } else if constexpr ( std::is_same<T, float>::value ) {
             return instance->uniform_real(instance->engine);
         } else {
             return T();
         }
     }
 
+    bool random_event(float probability) {
+        return uniform<float>() > probability;
+    }
+
     void tic() {
+        world.tic();
         for (auto &organism: population) {
-            organism.tic();
+            organism->tic();
+        }
+        ++long_tic_count;
+        if(long_tic_count > long_tic_length) {
+            long_tic_count = 0;
+            long_tic();
+        }
+    }
+
+    void long_tic() {
+//        world.tic();
+        for (auto &organism: population) {
+            organism->long_tic();
         }
     }
 
     void draw() {
+        world.draw();
         for (auto &organism: population) {
-            organism.draw();
+            organism->draw();
         }
+    }
+
+    void die(Entities::Organism* organism) {
+        population.erase(
+                std::find_if(population.begin(), population.end(),
+                                      [organism] (decltype(*population.begin()) ptr) { return ptr.get() == organism; }));
+    }
+
+    void add(std::unique_ptr<Entities::Organism> && organism, const coord_t & position) {
+        population.emplace_back(std::move(organism));
+        organism->set_position(position);
     }
 
     static Controller<Device, Engine> * instance ;
@@ -77,7 +106,10 @@ private:
     std::uniform_int_distribution<int>     uniform_int;
     std::uniform_real_distribution<float>  uniform_real;
 
-    std::vector<Entities::Organism>  population;
+    std::vector<std::unique_ptr<Entities::Organism>>  population;
+
+    static const int long_tic_length = 10;
+    int long_tic_count = 0;
 };
 
 template <class Device, class Engine>

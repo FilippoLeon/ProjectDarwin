@@ -18,10 +18,13 @@
 //
 #pragma once
 
+#include "allegro5/color.h"
+
 namespace Allegro {
 
 class Color {
 public:
+    Color() = default;
     Color(unsigned char r, unsigned char g, unsigned char b) {
         color = al_map_rgb(r, g, b);
     }
@@ -30,11 +33,11 @@ public:
         return color;
     }
 
-    static constexpr Color Red;
+    static Color Red;
 private:
     ALLEGRO_COLOR color;
 };
 
-}
+inline Color Color::Red;
 
-constexpr Color Color::Red = Color(255, 255, 255);
+}

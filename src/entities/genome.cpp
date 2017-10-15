@@ -35,12 +35,18 @@ Genome Genome::mix(const Genome & other) const {
 
 void Genome::process_food(Organism & organism) {
 	if(organism.food < organism.max_food) {
-		int delta = std::max(organism.max_food_store_rate, organism.max_food - organism.food);
+        int delta = std::min(organism.max_food_store_rate, organism.max_food - organism.food);
 
-		delta = Main::Controller<>::instance->world.try_drain_food(organism.get_position(), delta, true);
+        delta = Main::Controller<>::instance->world.try_drain_food(organism.get_position(), delta, true);
 
-		Main::Controller<>::instance->world.try_drain_food(organism.get_position(), delta, false);
-	}
+        Main::Controller<>::instance->world.try_drain_food(organism.get_position(), delta, false);
+    }
+
+    if(organism.food <= organism.min_food) {
+        organism.change_health();
+    } else if(organism.food >= organism.max_food_to_reproduce) {
+        organism.reproduce();
+    }
 }
 
 void Genome::process_position(Organism & organism) {

@@ -21,8 +21,11 @@
 #include <allegro5/allegro5.h>
 
 #include "allegro/allegro.hpp"
+#include "allegro/display.hpp"
 
 namespace Allegro {
+
+class Display;
 
 enum class Alignment {
     Left =   ALLEGRO_ALIGN_LEFT,
@@ -32,11 +35,14 @@ enum class Alignment {
 
 class Font {
 public:
-    Font(std::string filename, int size, int flags) {
-        font = al_load_font(filename.s_ctr(), size, flags);
+    Font(const std::string & filename, int size, int flags = 0) {
+        font = al_load_font(filename.c_str(), size, flags);
+        if(font == nullptr) {
+            BOOST_LOG_TRIVIAL(error) << "Failed loading font!";
+        }
 
-        if(main = nullptr) {
-            main = font;
+        if(main == nullptr) {
+            main = this;
         }
     }
 
@@ -46,15 +52,21 @@ public:
         }
     }
 
-    inline void draw(int x, int y, std::string text,
+    template <class PositionX, class PositionY>
+    inline void draw(PositionX&& x, PositionY&& y, std::string text,
                      Alignment alignment = Alignment::Left,
-                     Allegro::Color color = Allegro::Color::Red) {
-        al_draw_text(font, color, x, y, alignment, text.c_str());
+                     Color color = Color::Red) {
+        al_draw_text(font, color,
+                     Display::current->position<Axis::Horizontal>(x),
+                     Display::current->position<Axis::Vertical>(y),
+                     static_cast<int>(alignment), text.c_str());
     }
 
-    static Font * main = nullptr;
+    static Font * main;
 private:
     ALLEGRO_FONT *font = nullptr;
 };
+
+inline Font* Font::main = nullptr;
 
 }

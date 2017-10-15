@@ -18,13 +18,14 @@
 //
 #pragma once
 
-#include "main/grid.hpp"
+#include "allegro/display.hpp"
+#include "allegro/bitmap.hpp"
 
 #include "entities/dispatcher.hpp"
 #include "entities/genome.hpp"
 
-#include "allegro/bitmap.hpp"
-#include "allegro/display.hpp"
+#include "main/world.hpp"
+#include "main/grid.hpp"
 
 namespace Darwin::Entities {
 
@@ -37,12 +38,23 @@ public:
     virtual ~Organism() = default;
 
 	void tic(void);
+    void long_tic(void);
     void draw(void);
 
     Main::coord_t get_position();
 
     void change_position(const Main::coord_t & delta);
+    void set_position(const Main::coord_t & new_position);
     int drain_food(int amount);
+    inline void change_health(int delta = 5) {
+        health += (delta >= 0 ? 1 : -1) * std::max(std::abs(delta), health_drain_max);
+        if(health <= 0) {
+            die();
+        }
+    }
+
+    void die();
+    void reproduce();
 
     int size = 1;
 
@@ -50,9 +62,12 @@ public:
     int min_food = 10;
     int max_food = 100;
     int max_food_store_rate = 5;
+    int max_food_to_reproduce = 75;
+
 
     int health = 100;
     int health_max = 100;
+    const int health_drain_max = 5;
 private:
 	Genome genome;
 
@@ -66,7 +81,7 @@ public:
             : organism(organism), bitmap(10, 10) {
         {
             Allegro::ExpiringFuture fut = Allegro::Allegro::set_target(bitmap);
-            Allegro::Display::main->clear(Allegro::Color(188,188,0));
+            Allegro::Display::main->clear(Allegro::Color(0,0,244));
         }
 	}
 
@@ -76,7 +91,7 @@ public:
 
 	virtual void draw() {
         auto [x,y] = organism->get_position();
-        bitmap.draw(x, y ,0);
+        bitmap.draw(x * Main::World::tileSizeXw, y * Main::World::tileSizeXw ,0);
 	}
 private:
     Allegro::Bitmap bitmap;

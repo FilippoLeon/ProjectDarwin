@@ -27,11 +27,14 @@
 #include "allegro/chronometer.hpp"
 
 #include "allegro/color.hpp"
-#include "allegro/font.hpp"
 
 #include <iostream>
 
 namespace Allegro {
+
+enum class Axis {
+    Horizontal, Vertical,
+};
 
 class Display {
 public:
@@ -41,6 +44,7 @@ public:
 
         if(main == nullptr) {
             main = this;
+            current = this;
         }
     }
 
@@ -51,23 +55,22 @@ public:
         }
     }
 
-    inline void flip(void) {
-
-
-        std::chrono::nanoseconds ns = timer.elapsed();
-        std::cout << fmt::format("-- {} ns // {} FPS--",
-                                 ns.count(),
-                                 1000. / std::chrono::duration_cast<std::chrono::milliseconds>(ns).count());
-
-        Allegro::Font::main.draw(100, 10, "Hello");
-
-        al_flip_display();
-
-        timer.reset();
+    template <Axis ax>
+    float position(float x) {
+        return x;
     }
 
+    template <Axis ax>
+    float position(Percentage x) {
+        return (ax == Axis::Horizontal ? width_ : height_) * x.get();
+    }
+
+    void set_current() const;
+
+    void flip(void);
+
     inline void rest(float time) {
-        al_rest(10.0);
+        al_rest(time);
     }
 
     inline ALLEGRO_EVENT_SOURCE* event_source(void) const {
@@ -89,6 +92,9 @@ public:
         }
     }
 
+    int width_, height_;
+
+    static Display * current;
     static Display * main;
 protected:
     inline void init() {
@@ -103,23 +109,26 @@ protected:
         }
 
         al_clear_to_color(al_map_rgb(0,0,0));
+
+        width_ = al_get_display_width(display);
+        height_ = al_get_display_height(display);
     }
 
 
 private:
     ALLEGRO_DISPLAY * display = nullptr;
 
-    bool         draw_fps = false;
-    Chronometer  timer;
+    bool              draw_fps = false;
+    Chronometer       timer;
 };
-
 
 template <class Image>
 [[nodiscard]]
 inline decltype(auto) Allegro::set_target(const Image & img) {
+    Display* current = Display::current;
     return ExpiringFuture(
             [&img] () { al_set_target_bitmap(img.get()); },
-            [] () { al_set_target_bitmap(Display::main->get_backbuffer()); }
+            [current] () { current->set_current(); }
     );
 }
 

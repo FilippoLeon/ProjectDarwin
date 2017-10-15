@@ -22,6 +22,7 @@
 #include "allegro/bitmap.hpp"
 #include "allegro/event.hpp"
 #include "allegro/timer.hpp"
+#include "allegro/font.hpp"
 
 #include "main/darwin.hpp"
 #include "entities/organism.hpp"
@@ -30,20 +31,21 @@ int main() {
 
     Allegro::Allegro allegro(Allegro::Component::All);
 
-    Allegro::Display display(600, 600);
+    Allegro::Display display(1200, 1200);
+    Allegro::Font font("OpenSans-Regular.ttf", 14);
 
     Allegro::EventQueue event_queue;
 
     Allegro::Timer timer(1./60.);
 
-    Allegro::Bitmap image("image.png");
+//    Allegro::Bitmap image("image.png");
 
     timer.start();
 
     event_queue.register_source(display);
     event_queue.register_source(timer);
 
-    image.draw(10, 10, 0);
+//    image.draw(10, 10, 0);
 
 
     Allegro::Bitmap image2(200, 200);
